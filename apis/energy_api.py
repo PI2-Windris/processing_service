@@ -6,7 +6,7 @@ import json
 from datetime import datetime, timedelta
 import core.helper as helper
 
-api = Namespace('energy', description='Energy related calculations')
+api = Namespace('average', description='Average related calculations')
 
 parser = reqparse.RequestParser()
 parser.add_argument('begin', type=str, help='Time that begins')
@@ -31,9 +31,8 @@ class EnergyCalculation(Resource):
         if(args["end"] is not None):
             end = helper.str_to_date(args["end"], "%Y-%m-%dT%H:%M:%S")
 
-        energy_tension = 0
-        energy_current = 0
-        energy_per_time = []
+        average_tension = 0
+        average_current = 0
         i = 0
         sorted(res_json["energyData"],
                key=lambda i: helper.str_to_date(i["createdAt"]))
@@ -45,17 +44,17 @@ class EnergyCalculation(Resource):
 
             if(energy["createdAt"] > end):
                 break
-
-            energy_tension += int(energy["averageOutputTension"])
-            energy_current += abs(int(energy["averageOutputCurrent"]))
-
-            produce = int(energy["averageOutputTension"]) * \
-                abs(int(energy["averageOutputCurrent"]))
-            energy_per_time.append(
-                {"energyProduced": produce, "time": helper.date_to_str(energy["createdAt"])})
+            average_tension += int(energy["averageOutputTension"])
+            average_current += int(energy["averageOutputCurrent"])
             i = i + 1
+
         if not i:
             return {"averageEnergy": 0, "energyPerTime": []}
 
-        average_energy = (energy_tension/i) * (energy_current/i)
-        return {"averageEnergy": average_energy, "energyPerTime": energy_per_time}
+        average_tension /= i
+        average_current /= i
+        average_potency = 0
+        if current:
+            average_potency = average_tension / average_current
+
+        return {"averageTension": average_tension, "averageCurrent": average_current, "averagePotency": average_potency}
