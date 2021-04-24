@@ -7,8 +7,8 @@ import core.helper as helper
 from datetime import datetime, timedelta
 
 
-api = Namespace('Efficiency_inversor',
-                description='Efficiency inversor related calculations')
+api = Namespace('efficiency_system',
+                description='Efficiency system related calculations')
 parser = reqparse.RequestParser()
 parser.add_argument('begin', type=str, help='Time that begins')
 parser.add_argument('end', type=str, help='Time that ends')
@@ -29,7 +29,7 @@ class SystemEfficiency(Resource):
         if(args["end"] is not None):
             end = helper.str_to_date(args["end"], "%Y-%m-%dT%H:%M:%S")
 
-        res_json = helper.get_generator(id, headers)
+        res_json = helper.get_generator_energy(id, headers)
         eps = 0
         epe = 0
         efficiency_per_time = []
@@ -53,7 +53,7 @@ class SystemEfficiency(Resource):
             efficiency = eps / epe
             efficiency = f'{efficiency}'
             efficiency_per_time.append(
-                {"inversorEfficiency": efficiency, "time": helper.date_to_str(energy["createdAt"])})
+                {"SystemEfficiency": efficiency, "time": helper.date_to_str(energy["createdAt"])})
             i = i + 1
 
         if not i or not epe:

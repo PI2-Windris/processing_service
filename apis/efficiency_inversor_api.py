@@ -7,7 +7,7 @@ import core.helper as helper
 from datetime import datetime, timedelta
 
 
-api = Namespace('Efficiency_inversor',
+api = Namespace('efficiency_inversor',
                 description='Efficiency inversor related calculations')
 parser = reqparse.RequestParser()
 parser.add_argument('begin', type=str, help='Time that begins')
@@ -29,7 +29,7 @@ class InversorEfficiency(Resource):
         if(args["end"] is not None):
             end = helper.str_to_date(args["end"], "%Y-%m-%dT%H:%M:%S")
 
-        res_json = helper.get_generator(id, headers)
+        res_json = helper.get_generator_energy(id, headers)
         average_input_tension = 0
         average_output_tension = 0
         efficiency_per_time = []
