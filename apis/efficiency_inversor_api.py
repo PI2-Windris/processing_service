@@ -3,37 +3,36 @@ from flask import request
 import requests
 import os
 import json
-from datetime import datetime, timedelta
 import core.helper as helper
+from datetime import datetime, timedelta
 
-api = Namespace('energy', description='Energy related calculations')
 
+api = Namespace('Efficiency_inversor',
+                description='Efficiency inversor related calculations')
 parser = reqparse.RequestParser()
 parser.add_argument('begin', type=str, help='Time that begins')
 parser.add_argument('end', type=str, help='Time that ends')
 parser.add_argument('format', type=str, help='Format of the time')
 
-STORAGE_URI = os.environ.get('DATA_STORAGE_HOST')
-STORAGE_PORT = os.environ.get('DATA_STORAGE_PORT')
-
 
 @api.route('/<string:id>')
-class EnergyCalculation(Resource):
+class InversorEfficiency(Resource):
     def get(self, id):
-        headers = {"authorization": request.headers.get('authorization')}
         args = parser.parse_args()
-        res_json = helper.get_generator(id, headers)
+        headers = {"authorization": request.headers.get('authorization')}
         begin = datetime.now()
         end = datetime.now() - timedelta(days=1)
+
         if(args["begin"] is not None):
             begin = helper.str_to_date(args["begin"], "%Y-%m-%dT%H:%M:%S")
 
         if(args["end"] is not None):
             end = helper.str_to_date(args["end"], "%Y-%m-%dT%H:%M:%S")
 
-        energy_tension = 0
-        energy_current = 0
-        energy_per_time = []
+        res_json = helper.get_generator(id, headers)
+        average_input_tension = 0
+        average_output_tension = 0
+        efficiency_per_time = []
         i = 0
         sorted(res_json["energyData"],
                key=lambda i: helper.str_to_date(i["createdAt"]))
@@ -46,16 +45,16 @@ class EnergyCalculation(Resource):
             if(energy["createdAt"] > end):
                 break
 
-            energy_tension += int(energy["averageOutputTension"])
-            energy_current += abs(int(energy["averageOutputCurrent"]))
+            average_input_tension += abs(int(energy["averageInputTension"]))
+            average_output_tension += abs(int(energy["averageOutputTension"]))
 
-            produce = int(energy["averageOutputTension"]) * \
-                abs(int(energy["averageOutputCurrent"]))
-            energy_per_time.append(
-                {"energyProduced": produce, "time": helper.date_to_str(energy["createdAt"])})
+            efficiency = int(energy["averageInputTension"]) / abs(int(energy["averageOutputTension"]))
+            efficiency = f'{efficiency}'
+            efficiency_per_time.append(
+                {"inversorEfficiency": efficiency, "time": helper.date_to_str(energy["createdAt"])})
             i = i + 1
-        if not i:
-            return {"averageEnergy": 0, "energyPerTime": []}
 
-        average_energy = (energy_tension/i) * (energy_current/i)
-        return {"averageEnergy": average_energy, "energyPerTime": energy_per_time}
+        if not i or not average_output_tension:
+            return {"average": 0, "efficiencyPerTime": []}
+        average_energy = (average_input_tension/i) / (average_output_tension/i)
+        return {"average": average_energy, "efficiencyPerTime": efficiency_per_time}
