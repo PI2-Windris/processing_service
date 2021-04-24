@@ -33,6 +33,7 @@ class EnergyCalculation(Resource):
 
         average_tension = 0
         average_current = 0
+        average_supply = 0
         i = 0
         sorted(res_json["energyData"],
                key=lambda i: helper.str_to_date(i["createdAt"]))
@@ -46,6 +47,7 @@ class EnergyCalculation(Resource):
                 break
             average_tension += int(energy["averageOutputTension"])
             average_current += int(energy["averageOutputCurrent"])
+            average_supply += int(energy["averageSupply"])
             i = i + 1
 
         if not i:
@@ -53,8 +55,9 @@ class EnergyCalculation(Resource):
 
         average_tension /= i
         average_current /= i
+        average_supply /= i
         average_potency = 0
-        if current:
+        if average_current:
             average_potency = average_tension / average_current
 
-        return {"averageTension": average_tension, "averageCurrent": average_current, "averagePotency": average_potency}
+        return {"averageTension": average_tension, "averageCurrent": average_current, "averagePotency": average_potency, "averageSupply": average_supply}

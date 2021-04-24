@@ -16,7 +16,7 @@ parser.add_argument('format', type=str, help='Format of the time')
 
 
 @api.route('/<string:id>')
-class CoPerTime(Resource):
+class Climate(Resource):
     def get(self, id):
         args = parser.parse_args()
         headers = {"authorization": request.headers.get('authorization')}
@@ -30,8 +30,8 @@ class CoPerTime(Resource):
             end = helper.str_to_date(args["end"], "%Y-%m-%dT%H:%M:%S")
 
         res_json = helper.get_generator_climate(id, headers)
-        co = 0
-        co_per_time = []
+
+        wind = 0
         i = 0
         sorted(res_json["climateData"],
                key=lambda i: helper.str_to_date(i["createdAt"]))
@@ -43,13 +43,11 @@ class CoPerTime(Resource):
 
             if(climate["createdAt"] > end):
                 break
-            
-            co += int(climate["co2"])
-            co_per_time.append(
-                {"inversorEfficiency": climate["co2"], "time": helper.date_to_str(climate["createdAt"])})
+
+            wind += int(climate["co2"])
             i = i + 1
 
         if not i:
-            return {"average": 0, "co2PerTime": []}
-        average_energy = co/i
-        return {"average": average_energy, "co2PerTime": co_per_time}
+            return {"average": 0}
+
+        return {"average": (wind/i)}
