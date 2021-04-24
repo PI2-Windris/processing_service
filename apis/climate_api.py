@@ -31,7 +31,12 @@ class Climate(Resource):
 
         res_json = helper.get_generator_climate(id, headers)
 
-        wind = 0
+        wind_average = 0
+        wind_per_time = []
+        humidity_average = 0
+        humidity_per_time = []
+        temperature_average = 0
+        temperature_per_time = []
         i = 0
         sorted(res_json["climateData"],
                key=lambda i: helper.str_to_date(i["createdAt"]))
@@ -44,10 +49,35 @@ class Climate(Resource):
             if(climate["createdAt"] > end):
                 break
 
-            wind += int(climate["co2"])
+            wind_average += int(climate["wind"])
+            wind_per_time.append(
+                {"energyProduced": climate["wind"], "time": helper.date_to_str(climate["createdAt"])})
+
+            humidity_average += int(climate["umidity"])
+            humidity_per_time.append(
+                {"energyProduced": climate["umidity"], "time": helper.date_to_str(climate["createdAt"])})
+
+            temperature_average += int(climate["temperature"])
+            temperature_per_time.append(
+                {"energyProduced": climate["temperature"], "time": helper.date_to_str(climate["createdAt"])})
+
             i = i + 1
 
         if not i:
-            return {"average": 0}
+            return {
+                "averageWind": 0,
+                "windPerTime": [],
+                "averageHumidity": 0,
+                "humidityPerTime": [],
+                "averageTemperature": 0,
+                "temperaturePerTime": [],
+        }
 
-        return {"average": (wind/i)}
+        return {
+            "averageWind": (wind_average/i),
+            "windPerTime": wind_per_time,
+            "averageHumidity": (humidity_average/i),
+            "humidityPerTime": humidity_per_time,
+            "averageTemperature": (temperature_average/i),
+            "temperaturePerTime": temperature_per_time,
+        }
