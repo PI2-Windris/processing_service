@@ -20,8 +20,8 @@ class Climate(Resource):
     def get(self, id):
         args = parser.parse_args()
         headers = {"authorization": request.headers.get('authorization')}
-        begin = datetime.now()
-        end = datetime.now() - timedelta(days=1)
+        begin = datetime.utcnow() - timedelta(days=1)
+        end = datetime.utcnow()
 
         if(args["begin"] is not None):
             begin = helper.str_to_date(args["begin"], "%Y-%m-%dT%H:%M:%S")
