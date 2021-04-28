@@ -23,8 +23,8 @@ class EnergyCalculation(Resource):
         headers = {"authorization": request.headers.get('authorization')}
         args = parser.parse_args()
         res_json = helper.get_generator_energy(id, headers)
-        begin = datetime.now()
-        end = datetime.now() - timedelta(days=1)
+        begin = datetime.now() - timedelta(days=1)
+        end = datetime.now()
         if(args["begin"] is not None):
             begin = helper.str_to_date(args["begin"], "%Y-%m-%dT%H:%M:%S")
 

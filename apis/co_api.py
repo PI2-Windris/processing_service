@@ -20,8 +20,8 @@ class CoPerTime(Resource):
     def get(self, id):
         args = parser.parse_args()
         headers = {"authorization": request.headers.get('authorization')}
-        begin = datetime.now()
-        end = datetime.now() - timedelta(days=1)
+        begin = datetime.now() - timedelta(days=1)
+        end = datetime.now()
 
         if(args["begin"] is not None):
             begin = helper.str_to_date(args["begin"], "%Y-%m-%dT%H:%M:%S")
@@ -39,11 +39,14 @@ class CoPerTime(Resource):
         for climate in res_json["climateData"]:
             climate["createdAt"] = helper.str_to_date(climate["createdAt"])
             if(climate["createdAt"] < begin):
+                api.logger.info(f'create: {climate["createdAt"]}, begin: {begin}')
+                api.logger.info(climate["createdAt"] == begin)
                 continue
 
             if(climate["createdAt"] > end):
+                api.logger.info(f'create: {climate["createdAt"]}, begin: {end}')
                 break
-            
+
             co += int(climate["co2"])
             co_per_time.append(
                 {"inversorEfficiency": climate["co2"], "time": helper.date_to_str(climate["createdAt"])})
