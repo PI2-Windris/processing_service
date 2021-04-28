@@ -4,13 +4,13 @@ from datetime import datetime
 def evaluate_eolic(wind, potency):
   FS = sf.FuzzySystem()
   # Wind and potency are both trapezoidal
-  W_1 = sf.FuzzySet( points=[[0, 1.],  [0.5, 1.],  [2.5, 0]],          term="low_wind" )
-  W_2 = sf.FuzzySet( points=[[1.5, 0], [3.0, 1.], [20.0, 1], [25.0, 0]], term="ideal_wind" )
-  W_3 = sf.FuzzySet( points=[[20.0, 0],  [30., 1.], [60, 1.]],          term="high_wind" )
+  W_1 = sf.FuzzySet( points=[[0, 1.],  [2, 1.],  [3, 0]], term="low_wind" )
+  W_2 = sf.FuzzySet( points=[[2.5, 0], [6, 1.], [15, 1], [20, 0]], term="ideal_wind" )
+  W_3 = sf.FuzzySet( points=[[20.0, 0],  [25., 1.], [35, 1.]], term="high_wind" )
 
-  P_1 = sf.FuzzySet( points=[[0, 1.],  [50, 1.],  [100, 0]],          term="low_potency" )
-  P_2 = sf.FuzzySet( points=[[80, 0], [150, 1.], [400, 1], [500, 0]], term="average_potency" )
-  P_3 = sf.FuzzySet( points=[[450.0, 0],  [600., 1.], [1000, 1.]],          term="high_potency" )
+  P_1 = sf.FuzzySet( points=[[0, 1.],  [75, 1.],  [150, 0]], term="low_potency" )
+  P_2 = sf.FuzzySet( points=[[125, 0], [400, 1.], [1000, 1], [1500, 0]], term="average_potency" )
+  P_3 = sf.FuzzySet( points=[[1450, 0],  [2000, 1.], [2500, 1.]], term="high_potency" )
 
   FS.add_linguistic_variable("WIND", sf.LinguisticVariable( [W_1, W_2, W_3] ))
   FS.add_linguistic_variable("POT", sf.LinguisticVariable( [P_1, P_2, P_3] ))
@@ -57,11 +57,10 @@ def evaluate_solar(temperature, potency):
   FS.add_rules([RULE1, RULE2, RULE3])
 
   # Set antecedents values, perform Sugeno inference and print output values.
-  FS.set_variable("WIND", 50.0)
-  FS.set_variable("POT", 5.0)
+  FS.set_variable("TEMP", temperature)
+  FS.set_variable("POT", potency)
 
   health = FS.Sugeno_inference(['HEALTH'])
-  print( health )
   return health_status(health['HEALTH'])
 
 def health_status(value):

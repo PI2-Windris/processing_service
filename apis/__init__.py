@@ -8,4 +8,4 @@ api = Api(
     # All API metadatas
 )
 
-api.add_namespace(fuzzy, path='/catatau')
+api.add_namespace(fuzzy, path='/fuzzy')
